@@ -1,26 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import logo from './logo.svg';
-import './App.css';
+import { IonPhaser } from '@ion-phaser/react';
+import Scena1 from './prueba.js';
+//import scene2 from './scene2';
+
+import "./App.css"
+
 
 function App() {
+  let [game] = useState (Scena1.game);
+  let [initialize] = useState(true);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+    <div id="game" >
+      <IonPhaser game={game} initialize={initialize} />
+    </div>
     </div>
   );
 }
+
+
+
 
 export default App;

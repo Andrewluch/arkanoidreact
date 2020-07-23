@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 
-let player, ball, greenBricks, violetBricks, yellowBricks, redBricks, orangeBricks, greyBricks, moradoBricks, oscuroBricks, pinkBricks, rositaBricks, celesteBricks, grisverdosoBricks, balas, cursors, soundtrack, beep;
+let player, ball, greenBricks, violetBricks, yellowBricks, redBricks, greyBricks, moradoBricks, oscuroBricks, pinkBricks, rositaBricks, celesteBricks, grisverdosoBricks, tejaBricks, balas, cursors, soundtrack, beep;
 let gameStarted = false;
 
 let openingText, gameOverText, playerWonText;
@@ -9,8 +9,15 @@ let openingText, gameOverText, playerWonText;
 let playerX = 400;
 let playerY = 600
 let isBalaCreated = false
-var score = 0;
+
+let maximo;
+var highscoreText = maximo;
+var highscoreTextNumber;
+let score = localStorage.getItem('score');
 var scoreText;
+let arrayCapsulas = [];
+var livesTextNumber;
+var scoreTextNumber;
 var lives = 3;
 var livesText;
 var height = 640;
@@ -26,6 +33,8 @@ class Scene3 extends Phaser.Scene {
 
     preload() {
         this.load.image('background3', 'assets/images/background3.png');
+        this.load.image('logo', 'assets/images/arkanoid-logo.png');
+        this.load.image('creditos', 'assets/images/arkanoid-copyright.png');
         this.load.image('bordeIzdo', 'assets/images/borde-izdo.png');
         this.load.image('bordeSup', 'assets/images/borde-sup.png');
         this.load.image('ball', 'assets/images/ball_32_32.png');
@@ -42,40 +51,97 @@ class Scene3 extends Phaser.Scene {
         this.load.image('brick9b', 'assets/images/brick9b_64_32.png');
         this.load.image('brick9c', 'assets/images/brick9c_64_32.png');
         this.load.image('brick9d', 'assets/images/brick9d_64_32.png');
+        this.load.image('brick10', 'assets/images/brick9d_64_32.png');
         this.load.image('star', 'assets/images/star.png');
         this.load.spritesheet('capsularoja', 'assets/images/capsula-animada.png', { frameWidth: 53, frameHeight: 20 });
-        // this.load.spritesheet('capsulaverde', 'assets/images/capsula-verde-animada.png', { frameWidth: 53, frameHeight: 20 });
         this.load.spritesheet('capsulagris', 'assets/images/capsula-gris-animada.png', { frameWidth: 53, frameHeight: 20 });
+        this.load.spritesheet('capsulaceleste', 'assets/images/capsula-celeste-animada.png', { frameWidth: 53, frameHeight: 20 });
+        this.load.spritesheet('capsulaverde', 'assets/images/capsula-verde-animada.png', { frameWidth: 53, frameHeight: 20 });
+        this.load.spritesheet('capsulamorada', 'assets/images/capsula-morada-animada.png', { frameWidth: 53, frameHeight: 20 });
+        this.load.spritesheet('capsulanaranja', 'assets/images/capsula-naranja-animada.png', { frameWidth: 53, frameHeight: 20 });
         this.load.image('corazon', 'assets/images/corazon.png');
         this.load.image('boom', 'assets/images/boom2.png');
         this.load.image('bala', 'assets/images/bala.png');
         // this.load.image('bala2', 'assets/images/bala.png');
         this.load.audio('soundtrack', 'assets/audio/soundtrack.mp3');
         this.load.audio('beep', 'assets/audio/beep.wav');
-        // this.load.audio('laser', 'assets/audio/laser.mp3');
     };
 
     create() {
+        score = parseInt(localStorage.getItem('score'));
+        this.add.image(1000, 120, 'logo');
         this.add.image(400, 320, 'background3');
-        // bordeIzdo.create(15, 320, 'bordeIzdo');
-        // bordeIzdo.create(785, 320, 'bordeIzdo');
-        // bordeSup.create(320, 15, 'bordeSup');
-        // CREAR CAPSULA
-        var frameNames = this.anims.generateFrameNumbers('capsularoja', { start: 0, end: 8 });
-        var frameNames = this.anims.generateFrameNumbers('capsulagris', { start: 0, end: 8 });
+        this.add.image(995, 620, 'creditos');
 
+        //CAPSULA ROJA
+        var frameNames = this.anims.generateFrameNumbers('capsularoja', { start: 0, end: 8 });
         this.anims.create({
-            key: 'turnCapsule',
+            key: 'turnCapsuleRoja',
             frames: frameNames,
             frameRate: 10,
             repeat: -1
         });
+
+        //CAPSULA GRIS
+        var frameNames = this.anims.generateFrameNumbers('capsulagris', { start: 0, end: 8 });
         this.anims.create({
             key: 'turnCapsuleGris',
             frames: frameNames,
             frameRate: 10,
             repeat: -1
         });
+
+        //CAPSULA CELESTE
+        var frameNames = this.anims.generateFrameNumbers('capsulaceleste', { start: 0, end: 8 });
+        this.anims.create({
+            key: 'turnCapsuleCeleste',
+            frames: frameNames,
+            frameRate: 10,
+            repeat: -1
+        });
+
+        //CAPSULA VERDE
+        var frameNames = this.anims.generateFrameNumbers('capsulaverde', { start: 0, end: 8 });
+        this.anims.create({
+            key: 'turnCapsuleVerde',
+            frames: frameNames,
+            frameRate: 10,
+            repeat: -1
+        });
+
+        //CAPSULA MORADA
+        var frameNames = this.anims.generateFrameNumbers('capsulamorada', { start: 0, end: 8 });
+        this.anims.create({
+            key: 'turnCapsuleMorada',
+            frames: frameNames,
+            frameRate: 10,
+            repeat: -1
+        });
+
+        //CAPSULA NARANJA
+        var frameNames = this.anims.generateFrameNumbers('capsulanajanja', { start: 0, end: 8 });
+        this.anims.create({
+            key: 'turnCapsuleNaranja',
+            frames: frameNames,
+            frameRate: 10,
+            repeat: -1
+        });
+
+
+        // CREAR LA PALA
+        player = this.physics.add.sprite(
+            playerX,
+            playerY,
+            'paddle',
+        );
+
+        // CREAR LA BOLA
+        ball = this.physics.add.sprite(
+            400,
+            565,
+            'ball'
+        );
+
 
         // AÑADIR LADRILLOS AMARILLOS
         yellowBricks = this.physics.add.group({
@@ -173,7 +239,7 @@ class Scene3 extends Phaser.Scene {
 
 
 
-        // AÑADIR LADRILLOS GRISES
+        // AÑADIR LADRILLOS GRISES VERDOSOS
         grisverdosoBricks = this.physics.add.group({
             key: 'brick9c',
             repeat: 1,
@@ -185,17 +251,17 @@ class Scene3 extends Phaser.Scene {
             }
         });
 
-        // AÑADIR LADRILLOS NARANJAS 
-        orangeBricks = this.physics.add.group({
-            key: 'brick7',
-            repeat: 1,
-            immovable: true,
-            setXY: {
-                x: 90,
-                y: 70,
-                stepX: 610
-            }
-        });
+        // // AÑADIR LADRILLOS NARANJAS 
+        // orangeBricks = this.physics.add.group({
+        //     key: 'brick7',
+        //     repeat: 1,
+        //     immovable: true,
+        //     setXY: {
+        //         x: 90,
+        //         y: 70,
+        //         stepX: 610
+        //     }
+        // });
         // AÑADIR LADRILLOS ROSITAS 
         rositaBricks = this.physics.add.group({
             key: 'brick9d',
@@ -208,9 +274,9 @@ class Scene3 extends Phaser.Scene {
             }
         });
 
-        // AÑADIR LADRILLOS MORADOSCURO 
-        redBricks = this.physics.add.group({
-            key: 'brick7',
+        // AÑADIR LADRILLOS TEJA 
+        tejaBricks = this.physics.add.group({
+            key: 'brick10',
             repeat: 1,
             immovable: true,
             setXY: {
@@ -227,31 +293,12 @@ class Scene3 extends Phaser.Scene {
             immovable: true,
             setXY: {
                 x: 90,
-                y: 400,
+                y: 385,
                 stepX: 70
             }
         });
-        // CREAR LA PALA
-        player = this.physics.add.sprite(
-            playerX,
-            playerY,
-            'paddle',
-        );
-
-        // CREAR LA BOLA
-        ball = this.physics.add.sprite(
-            400,
-            565,
-            'ball'
-        );
 
 
-        // CREAR LA BALA
-        /*bala = this.physics.add.sprite(
-          432, // x position
-          560, // y position
-          'bala' // clave de imagen para el sprite
-        );*/
 
 
         // AÑADIR EL AUDIO 
@@ -268,158 +315,10 @@ class Scene3 extends Phaser.Scene {
 
 
 
-        // // AÑADIR LADRILLOS VERDES
-        // greenBricks = this.physics.add.group({
-        //     key: 'brick4',
-        //     repeat: 1,
-        //     immovable: true,
-        //     setXY: {
-        //         x: 275,
-        //         y: 145,
-        //         stepX: 240
-        //     }
-        // });
-        // // AÑADIR LADRILLOS ROJOS
-        // redBricks = this.physics.add.group({
-        //     key: 'brick3',
-        //     repeat: 1,
-        //     immovable: true,
-        //     setXY: {
-        //         x: 275,
-        //         y: 245,
-        //         stepX: 240
-        //     }
-        // });
-        // // AÑADIR LADRILLOS ROSAS
-        // pinkBricks = this.physics.add.group({
-        //     key: 'brick5',
-        //     repeat: 1,
-        //     immovable: true,
-        //     setXY: {
-        //         x: 335,
-        //         y: 170,
-        //         stepX: 120
-        //     }
-        // });
-        // // AÑADIR LADRILLOS VERDE OSCURO
-        // oscuroBricks = this.physics.add.group({
-        //     key: 'brick9',
-        //     repeat: 1,
-        //     immovable: true,
-        //     setXY: {
-        //         x: 335,
-        //         y: 220,
-        //         stepX: 120
-        //     }
-        // });
-        // // AÑADIR LADRILLOS AZUL CELESTE
-        // celesteBricks = this.physics.add.group({
-        //     key: 'brick9b',
-        //     repeat: 0,
-        //     immovable: true,
-        //     setXY: {
-        //         x: 395,
-        //         y: 195,
-        //         stepX: 150
-        //     }
-        // });
-
-        // // AÑADIR LADRILLOS VIOLETAS
-        // violetBricks = this.physics.add.group({
-        //     key: 'brick1',
-        //     repeat: 1,
-        //     immovable: true,
-        //     setXY: {
-        //         x: 215,
-        //         y: 120,
-        //         stepX: 358
-        //     }
-        // });
-        // // AÑADIR LADRILLOS MORADOS
-        // moradoBricks = this.physics.add.group({
-        //     key: 'brick8',
-        //     repeat: 1,
-        //     immovable: true,
-        //     setXY: {
-        //         x: 215,
-        //         y: 270,
-        //         stepX: 358
-        //     }
-        // });
-
-        // // AÑADIR LADRILLOS AMARILLOS
-        // yellowBricks = this.physics.add.group({
-        //     key: 'brick2',
-        //     repeat: 1,
-        //     immovable: true,
-        //     setXY: {
-        //         x: 155,
-        //         y: 95,
-        //         stepX: 480
-        //     }
-        // });
-
-        // // AÑADIR LADRILLOS GRISES
-        // greyBricks = this.physics.add.group({
-        //     key: 'brick6',
-        //     repeat: 1,
-        //     immovable: true,
-        //     setXY: {
-        //         x: 155,
-        //         y: 295,
-        //         stepX: 480
-        //     }
-        // });
-
-        // // AÑADIR LADRILLOS NARANJAS 
-        // orangeBricks = this.physics.add.group({
-        //     key: 'brick7',
-        //     repeat: 1,
-        //     immovable: true,
-        //     setXY: {
-        //         x: 90,
-        //         y: 70,
-        //         stepX: 610
-        //     }
-        // });
-        // // AÑADIR LADRILLOS NARANJAS 
-        // orangeBricks = this.physics.add.group({
-        //     key: 'brick7',
-        //     repeat: 1,
-        //     immovable: true,
-        //     setXY: {
-        //         x: 100,
-        //         y: 70,
-        //         stepX: 610
-        //     }
-        // });
-        // // AÑADIR LADRILLOS MORADOSCURO 
-        // redBricks = this.physics.add.group({
-        //     key: 'brick7',
-        //     repeat: 1,
-        //     immovable: true,
-        //     setXY: {
-        //         x: 90,
-        //         y: 70,
-        //         stepX: 610
-        //     }
-        // });
-        //AÑADIR BALAS
-        balas = this.physics.add.group({
-            key: 'bala',
-            repeat: 1,
-            immovable: true,
-            setXY: {
-                playerX,
-                playerY,
-                stepX: 30
-            }
-        });
-
-
         // MANEJAR CON EL TECLADO
         cursors = this.input.keyboard.createCursorKeys();
         this.physics.world.setBounds(25, 25, 745, 640);
+
         // PARA QUE LA PELOTA Y EL JUGADOR NO SALGAN DE LA PANTALLA
         player.setCollideWorldBounds(true);
         ball.setCollideWorldBounds(true);
@@ -432,24 +331,21 @@ class Scene3 extends Phaser.Scene {
         this.physics.add.collider(ball, grisverdosoBricks, hitBrick, null, this);
         this.physics.add.collider(ball, violetBricks, hitBrick, null, this);
         this.physics.add.collider(ball, yellowBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, tejaBricks, hitBrick, null, this);
         this.physics.add.collider(ball, redBricks, hitBrick, null, this);
         this.physics.add.collider(ball, greenBricks, hitBrick, null, this);
         this.physics.add.collider(ball, greyBricks, hitBrick, null, this);
         this.physics.add.collider(ball, pinkBricks, hitBrick, null, this);
-        this.physics.add.collider(ball, orangeBricks, hitBrick, null, this);
+        // this.physics.add.collider(ball, orangeBricks, hitBrick, null, this);
         this.physics.add.collider(ball, moradoBricks, hitBrick, null, this);
         this.physics.add.collider(ball, oscuroBricks, hitBrick, null, this);
         this.physics.add.collider(ball, celesteBricks, hitBrick, null, this);
         this.physics.add.collider(ball, rositaBricks, hitBrick, null, this);
-        // this.physics.add.collider(ball, greenBricks, hitBrick, null, this);
-        // this.physics.add.collider(ball, bordeIzdo);
-        // this.physics.add.collider(ball, bordeSup);
-        // this.physics.add.collider(player, bordeIzdo);
 
 
         // Hacer que el jugador sea inamovible
         player.setImmovable(true);
-        //bala.setImmovable(true);
+
         // Añadir colisión para la jugadora
         this.physics.add.collider(ball, player, hitPlayer, null, this);
 
@@ -516,12 +412,9 @@ class Scene3 extends Phaser.Scene {
             'You won!',
             {
                 fontFamily: 'Game Over',
-                fontSize: '100px',
+                fontSize: '150px',
                 fill: '#fff'
             },
-
-            //this.scene.add('scene2'),
-            //this.scene.add('Scene2'),
 
         );
 
@@ -531,19 +424,50 @@ class Scene3 extends Phaser.Scene {
         playerWonText.setVisible(false);
 
         // TEXTO SCORE
-        scoreText = this.add.text(50, 16, 'Score: 0', { fontSize: '24px', fill: '#fff' });
-        livesText = this.add.text(626, 16, 'Lives: 3', { fontSize: '24px', fill: '#fff' });
+        
+
+highscoreText = this.add.text(850, 190, 'High Score ', { fontFamily: 'Game Over', fontSize: '100px', fill: '#fff' });
+highscoreTextNumber = this.add.text(850, 220, '0', { fontFamily: 'Game Over', fontSize: '125px', fill: 'yellow' });
+scoreText = this.add.text(850, 290, 'Score ', { fontFamily: 'Game Over', fontSize: '100px', fill: '#fff' });
+scoreTextNumber = this.add.text(850, 320, '0', { fontFamily: 'Game Over', fontSize: '125px', fill: 'yellow' });    
+livesText = this.add.text(850, 390, 'Lives ', { fontFamily: 'Game Over', fontSize: '100px', fill: '#fff' });
+livesTextNumber = this.add.text(850, 420, '3', { fontFamily: 'Game Over', fontSize: '125px', fill: 'yellow' });
+
+
+
 
     };
     update() {
+        console.log('en la escena 3')
+        let highscore = localStorage.getItem('highscore')
+        maximo = localStorage.getItem('highscore')
+        highscoreText.setText('High Score ' )
+        highscoreTextNumber.setText( maximo)
+        scoreText.setText('Score ' )
+    scoreTextNumber.setText( score)
+
+        if (highscore === undefined) {
+            parseInt(localStorage.setItem('highscore', score))
+        }
+        if (score > highscore) {
+            parseInt(localStorage.setItem('highscore', score))
+        }
+
         if (isGameOver(this.physics.world)) {
             gameOverText.setVisible(false);
             //ball.disableBody(true, true);
             soundtrack.stop('');
             lives = lives - 1;
-            livesText.setText('Lives: ' + lives);
+            livesTextNumber.setText(lives);
+            livesText.setText('Lives ' )
+            for (let i = 0; i < arrayCapsulas.length; i++) {
+                arrayCapsulas[i].destroy()
+            }
             ball.setPosition(400, 565);
             player.setPosition(400, 600);
+            ball.body.setVelocityX(ball.body.velocity.x)
+            ball.body.setVelocityX(ball.body.velocity.y)
+
             if (lives === 0) {
                 gameOverText.setVisible(true);
                 ball.body.setVelocityY(0);
@@ -566,26 +490,15 @@ class Scene3 extends Phaser.Scene {
              ajustar la velocidad de movimiento en lugar de manipular los valores xy directamente
              */
             if (cursors.left.isDown) {
-                player.body.setVelocityX(-1200);
-
-
+                player.body.setVelocityX(-600);
                 playerX = player.body.position.x
-                console.log("pala: " + playerX);
                 playerY = player.body.position.y
-                // if(isBalaCreated){
-                //  bala.body.setVelocityX(-1200);
-                // // bala2.body.setVelocityX(-1200);
-                // }
+
             } else if (cursors.right.isDown) {
-                player.body.setVelocityX(1200);
-                console.log("pala: " + playerX);
-
+                player.body.setVelocityX(600);
                 playerX = player.body.position.x
                 playerY = player.body.position.y
-                // if(isBalaCreated){
-                //  bala.body.setVelocityX(1200);
-                // // bala2.body.setVelocityX(1200);
-                // }
+
             }
 
             // El juego solo comienza cuando el usuario presiona la barra espaciadora para soltar la pala
@@ -593,30 +506,16 @@ class Scene3 extends Phaser.Scene {
 
                 // La pelota debe seguir la paleta mientras el usuario selecciona por dónde comenzar
                 ball.setX(player.x);
-                //bala.setX(player.x + 35);
-                //bala2.setX(player.x -40);
-                //bala1.setX(player.x);
+
 
                 if (cursors.space.isDown) {
                     gameStarted = true;
-                    /*
-                    if(tieneLaCapsulaDeDisparar) {
-                      //creamos un objeto bala.
-                      // le damos posicion X y posicion Y de la pala
-                      // le damos velocityy -200
-                    }
-                    */
-
                     ball.setVelocityY(-300);
-                    //bala.setImmovable(true);
-                    // bala.setVelocityY(-200);
-                    // bala2.setVelocityY(-200);
-
                     openingText.setVisible(false);
                 }
             }
         }
-    };
+    }
 
 }
 
@@ -637,7 +536,7 @@ function isGameOver(world) {
  @return {boolean}
  */
 function isWon() {
-    return violetBricks.countActive() + redBricks.countActive() + moradoBricks.countActive() + pinkBricks.countActive() + greyBricks.countActive() + oscuroBricks.countActive() + celesteBricks.countActive() + orangeBricks.countActive() + yellowBricks.countActive() + greenBricks.countActive() + grisverdosoBricks.countActive() + rositaBricks.countActive() == 0;
+    return violetBricks.countActive() + redBricks.countActive() + moradoBricks.countActive() + pinkBricks.countActive() + greyBricks.countActive() + oscuroBricks.countActive() + celesteBricks.countActive()  + yellowBricks.countActive() + greenBricks.countActive() + grisverdosoBricks.countActive() + rositaBricks.countActive() + tejaBricks.countActive() == 0;
 }
 // 
 
@@ -653,6 +552,11 @@ function isWon() {
 function hitBala(bala, brick) {
     brick.disableBody(true, true);
     bala.disableBody(true, true);
+    score += 10;
+    scoreText.setText('Score ' )
+    scoreTextNumber.setText( score)
+
+
 }
 
 function hitBrick(ball, brick) {
@@ -660,86 +564,194 @@ function hitBrick(ball, brick) {
     let noCoincidir = false;
 
 
-    const estrellaAleatoria = Math.floor(Math.random() * 10);
-    if (estrellaAleatoria === 0 && noCoincidir === false) {
+    // CAPSULA ALEATORIA ROJA
+    const capsulaRojaAleatoria = Math.floor(Math.random() * 9);
+    if (capsulaRojaAleatoria === 0 && noCoincidir === false) {
         let posicionX = brick.body.position.x + 30;
         let posicionY = brick.body.position.y + 10;
-        this.star = this.physics.add.image(posicionX, posicionY, 'star');
-        this.star.setGravityY(100);
-        noCoincidir = true;
-
-        //COLISION ESTRELLA CON PALA
-        this.physics.add.collider(this.star, player, hitStar, null, this);
-
-    }
-
-
-    // CAPSULA ALEATORIA
-    const numeroAleatorio = Math.floor(Math.random() * 6);
-    // const numeroAleatorio = 0;
-    if (numeroAleatorio === 0 && noCoincidir === false) {
-        let posicionX = brick.body.position.x + (brick.body.width / 1.3) + 10; // 10 es mitad de la anchura de la estrella
-        let posicionY = brick.body.position.y + (brick.body.height / 2);
         this.capsula = this.physics.add.sprite(posicionX, posicionY, 'capsularoja');
         this.capsula.setGravityY(100);
-        this.physics.add.collider(this.capsula, player, hitCapsula, null, this);
-        this.capsula.anims.play('turnCapsule');
+        this.physics.add.collider(this.capsula, player, hitBoom, null, this);
+        this.capsula.anims.play('turnCapsuleRoja');
+        noCoincidir = true;
+        arrayCapsulas.push(this.capsula)
+
+        //COLISION BOMBA CON PALA
+        this.physics.add.collider(this.capsula, player, hitBoom, null, this);
+       
+
     }
 
-    const numeroAleatorio2 = Math.floor(Math.random() * 6);
-    if (numeroAleatorio2 === 0 && noCoincidir === false) {
-        let posicionX = brick.body.position.x + 30; // 10 es mitad de la anchura de la estrella
+    //CAPSULA ALEATORIA NARANJA
+    const capsulaNaranjaAleatoria = Math.floor(Math.random() * 10);
+    if (capsulaNaranjaAleatoria === 0 && noCoincidir === false) {
+        let posicionX = brick.body.position.x + (brick.body.width / 3.2) + 10;
+        let posicionY = brick.body.position.y + (brick.body.height / 2);
+        this.capsula = this.physics.add.sprite(posicionX, posicionY, 'capsulanaranja');
+        this.capsula.setGravityY(100);
+        this.capsula.anims.play('turnCapsuleNaranja');
+        noCoincidir = true;
+        arrayCapsulas.push(this.capsula)
+
+        //COLISION CON PALA
+        this.physics.add.collider(this.capsula, player, hitCapsulaNaranja, null, this);
+    }
+
+
+    // CAPSULA ALEATORIA GRIS
+    const capsulaGrisAleatoria = Math.floor(Math.random() * 9);
+    if (capsulaGrisAleatoria === 0 && noCoincidir === false) {
+        let posicionX = brick.body.position.x + 30;
         let posicionY = brick.body.position.y + 10;
         this.capsula = this.physics.add.sprite(posicionX, posicionY, 'capsulagris');
         this.capsula.setGravityY(100);
         this.physics.add.collider(this.capsula, player, hitCorazon, null, this);
         this.capsula.anims.play('turnCapsuleGris');
+        noCoincidir = true;
+        arrayCapsulas.push(this.capsula)
+
+        //COLISION CORAZON CON PALA
         this.physics.add.collider(this.capsula, player, hitCorazon, null, this);
+
     }
-    // const corazonAleatorio = Math.floor(Math.random() * 2);
-    // if (corazonAleatorio === 0 && noCoincidir === false) {
-    //     let posicionX = brick.body.position.x + 30;
-    //     let posicionY = brick.body.position.y + 10;
-    //     this.capsula = this.physics.add.sprite(posicionX, posicionY, 'capsulagris');
-    //     this.capsula.setGravityY(100);
-    //     this.physics.add.collider(this.capsula, player, hitCorazon, null, this);
-    //     this.capsula.anims.play('turnCapsuleGris');
-    //     noCoincidir = true;
 
-    //     //COLISION CORAZON CON PALA
-    //     this.physics.add.collider(this.corazon, player, hitCorazon, null, this);
-
-    // }
-
-    // const corazonAleatorio = Math.floor(Math.random() * 20);
-    // if (corazonAleatorio === 0 && noCoincidir === false) {
-    //     let posicionX = brick.body.position.x + 30;
-    //     let posicionY = brick.body.position.y + 10;
-    //     this.corazon = this.physics.add.image(posicionX, posicionY, 'corazon');
-    //     this.corazon.setGravityY(100);
-    //     noCoincidir = true;
-
-    //     //COLISION CORAZON CON PALA
-    //     this.physics.add.collider(this.corazon, player, hitCorazon, null, this);
-
-    // }
-
-    const bombaAleatoria = Math.floor(Math.random() * 8);
-    if (bombaAleatoria === 0 && noCoincidir === false) {
+    //CAPSULA ALEATORIA CELESTE
+    const capsulaCelesteAleatoria = Math.floor(Math.random() * 6);
+    if (capsulaCelesteAleatoria === 0 && noCoincidir === false) {
         let posicionX = brick.body.position.x + 30;
         let posicionY = brick.body.position.y + 10;
-        this.boom = this.physics.add.image(posicionX, posicionY, 'boom');
-        this.boom.setGravityY(100);
+        this.capsula = this.physics.add.sprite(posicionX, posicionY, 'capsulaceleste');
+        this.capsula.anims.play('turnCapsuleCeleste');
+        this.capsula.setGravityY(100);
         noCoincidir = true;
+        arrayCapsulas.push(this.capsula)
 
-        //COLISION BOMBA CON PALA
-        this.physics.add.collider(this.boom, player, hitBoom, null, this);
-        // this.physics.add.collider(this.boom, player,hitBala, null, this);
+        //COLISION ESTRELLA CON PALA
+        this.physics.add.collider(this.capsula, player, hitStar, null, this);
 
     }
 
+    //CAPSULA ALEATORIA VERDE
+    const capsulaVerdeAleatoria = Math.floor(Math.random() * 4);
+    if (capsulaVerdeAleatoria === 0 && noCoincidir === false) {
+        let posicionX = brick.body.position.x + (brick.body.width / 3.2) + 10;
+        let posicionY = brick.body.position.y + (brick.body.height / 2);
+        this.capsula = this.physics.add.sprite(posicionX, posicionY, 'capsulaverde');
+        this.capsula.setGravityY(100);
+        this.capsula.anims.play('turnCapsuleVerde');
+        noCoincidir = true;
+        arrayCapsulas.push(this.capsula)
+
+        //COLISION  CON PALA
+        this.physics.add.collider(this.capsula, player, hitCapsulaVerde, null, this);
+    }
+
+    //CAPSULA ALEATORIA MORADA
+    const capsulaMoradaAleatoria = Math.floor(Math.random() * 5);
+    if (capsulaMoradaAleatoria === 0 && noCoincidir === false) {
+        let posicionX = brick.body.position.x + (brick.body.width / 3.2) + 10;
+        let posicionY = brick.body.position.y + (brick.body.height / 2);
+        this.capsula = this.physics.add.sprite(posicionX, posicionY, 'capsulamorada');
+        this.capsula.setGravityY(100);
+        this.capsula.anims.play('turnCapsuleMorada');
+
+        //COLISION  CON PALA
+        this.physics.add.collider(this.capsula, player, hitCapsulaMorada, null, this);
+    }
+
+    //FUNCIONES DE LAS COSAS QUE CAEN CAPSULA CELESTE
+    function hitStar(capsula, player) {
+        capsula.disableBody(true, true);
+        ball = this.physics.add.sprite(
+            400,
+            565,
+            'ball',
+        );
+        ball.setVelocityY(-300)
+        ball.setBounce(1, 1);
+        this.physics.add.collider(ball, grisverdosoBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, violetBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, yellowBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, tejaBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, redBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, greenBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, greyBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, pinkBricks, hitBrick, null, this);
+        // this.physics.add.collider(ball, orangeBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, moradoBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, oscuroBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, celesteBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, rositaBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, player, hitPlayer, null, this);
+
+        
+        
+
+
+        ball.setCollideWorldBounds(true);
+
+    }
+
+    let verde = false;
+    function hitCapsulaVerde(capsula, player) {
+        verde = true;
+        player.scaleX = 1;
+        capsula.disableBody(true, true);
+        ball.setPosition(400, 565);
+        gameStarted = false;
+        ball.body.setVelocityY(0);
+        ball.body.setVelocityX(0);
+        if (cursors.space.isDown) {
+            ball.body.setVelocityY(-400);
+            ball.body.setVelocityX(400);
+            verde = false;
+        }
+    }
+    function hitCapsulaNaranja(capsula, player) {
+
+        capsula.disableBody(true, true);
+        player.scaleX = 1;
+        let oldXVelocity = ball.body.velocity.x;
+        let oldYVelocity = ball.body.velocity.y;
+        let newXVelocity = ball.body.velocity.x / 2;
+        let newYVelocity = ball.body.velocity.y / 2;
+        ball.body.setVelocityY(newYVelocity);
+        ball.body.setVelocityX(newXVelocity);
+        setTimeout(() => {
+            // newXVelocity = ball.body.velocity.x ;
+            // newYVelocity = ball.body.velocity.y ;
+            ball.body.setVelocityX(ball.body.velocity.x * 2);
+            ball.body.setVelocityY(ball.body.velocity.y * 2);
+
+        }, 5000)
+
+
+
+
+    }
+
+    let palaDoble = false;
+    function hitCapsulaMorada(capsula, player) {
+
+
+        capsula.disableBody(true, true);
+        palaDoble = true;
+        player.scaleX = 1.5;
+        if (palaDoble === true) {
+            setTimeout(function () {
+
+                player.scaleX = 1;
+            }, 5000)
+
+        }
+
+    }
+
+
     score += 10;
-    scoreText.setText('Score: ' + score);
+    scoreText.setText('Score ' )
+    scoreTextNumber.setText( score)
+
     beep.play();
 
     if (ball.body.velocity.x == 0) {
@@ -762,12 +774,27 @@ function hitBrick(ball, brick) {
   @param ball - the ball sprite
   @param player - the player/paddle sprite
  */
+
+//ESTO ES LO MIO
+// function hitPlayer(ball, player) {
+//     // Aumenta la velocidad de la pelota después de que rebota
+//     ball.setVelocityY(ball.body.velocity.y - 5);
+
+//     let newXVelocity = Math.abs(ball.body.velocity.x) + 5;
+//     // Si la pelota está a la izquierda del jugador, asegúrese de que la velocidad x sea negativa
+//     if (ball.x < player.x) {
+//         ball.setVelocityX(-newXVelocity);
+//     } else {
+//         ball.setVelocityX(newXVelocity);
+//     }
+// }
+
 function hitPlayer(ball, player) {
-    // Aumenta la velocidad de la pelota después de que rebota
+    // Increase the velocity of the ball after it bounces
     ball.setVelocityY(ball.body.velocity.y - 5);
 
     let newXVelocity = Math.abs(ball.body.velocity.x) + 5;
-    // Si la pelota está a la izquierda del jugador, asegúrese de que la velocidad x sea negativa
+    // If the ball is to the left of the player, ensure the x velocity is negative
     if (ball.x < player.x) {
         ball.setVelocityX(-newXVelocity);
     } else {
@@ -775,76 +802,57 @@ function hitPlayer(ball, player) {
     }
 }
 
-
-//FUNCIONES DE LAS COSAS QUE CAEN
-function hitStar(star, player) {
-    star.disableBody(true, true);
-    score = score * 2;
-    scoreText.setText('Score: ' + score);
-    // player.width.setScale(2).refreshBody();
-}
-
-function hitCapsula(capsula, player) {
-    // Si la capsula golpea la pala, pasa algo:
-    capsula.disableBody(true, true);
-    //player.width.setScale(2).refreshBody();
-}
-
-
 function hitCorazon(capsula, player) {
     capsula.disableBody(true, true);
     lives = lives + 1
 
-    livesText.setText('Lives: ' + lives);
-    // player.width.setScale(2).refreshBody();
+    livesTextNumber.setText(lives);
+    livesText.setText('Lives ' )
+    livesText.setFontFamily('Game Over');
+   
 }
 
-function hitBoom(boom, player) {
-    boom.disableBody(true, true);
+function hitBoom(capsula, player) {
+    capsula.disableBody(true, true);
     let fisica = this.physics;
     disparar(fisica, 5);
-    //game.time.events.repeat(Phaser.Timer.SECOND * 5, 5, bala, this);
-}
 
-function disparar(fisica, repeticiones) {
-    balas = fisica.add.group({
-        key: 'bala',
-        repeat: 1,
-        setXY: { x: playerX, y: playerY, stepX: 60 }
-    });
 
-    balas.children.iterate(function (bala) {
+    function disparar(fisica, repeticiones) {
+        balas = fisica.add.group({
+            key: 'bala',
+            repeat: 1,
+            setXY: { x: playerX, y: playerY, stepX: 60 }
+        });
 
-        bala.setVelocityY(-900)
-        bala.setCollideWorldBounds(false);
+        balas.children.iterate(function (bala) {
 
-        fisica.add.collider(bala, moradoBricks, hitBala, null, this);
-        fisica.add.collider(bala, celesteBricks, hitBala, null, this);
-        fisica.add.collider(bala, oscuroBricks, hitBala, null, this);
-        fisica.add.collider(bala, violetBricks, hitBala, null, this);
-        fisica.add.collider(bala, yellowBricks, hitBala, null, this);
-        fisica.add.collider(bala, redBricks, hitBala, null, this);
-        fisica.add.collider(bala, greenBricks, hitBala, null, this);
-        fisica.add.collider(bala, greyBricks, hitBala, null, this);
-        fisica.add.collider(bala, orangeBricks, hitBala, null, this);
-        fisica.add.collider(bala, pinkBricks, hitBala, null, this);
-    });
+            bala.setVelocityY(-900)
+            bala.setCollideWorldBounds(false);
 
-    if (repeticiones > 0) {
-        setTimeout(function () {
-            disparar(fisica, repeticiones - 1);
-        }, 500)
-        // laser = this.sound.add('laser');
+            fisica.add.collider(bala, moradoBricks, hitBala, null, this);
+            fisica.add.collider(bala, celesteBricks, hitBala, null, this);
+            fisica.add.collider(bala, oscuroBricks, hitBala, null, this);
+            fisica.add.collider(bala, violetBricks, hitBala, null, this);
+            fisica.add.collider(bala, yellowBricks, hitBala, null, this);
+            fisica.add.collider(bala, redBricks, hitBala, null, this);
+            fisica.add.collider(bala, tejaBricks, hitBala, null, this);
+            fisica.add.collider(bala, greenBricks, hitBala, null, this);
+            fisica.add.collider(bala, greyBricks, hitBala, null, this);
+            // fisica.add.collider(bala, orangeBricks, hitBala, null, this);
+            fisica.add.collider(bala, pinkBricks, hitBala, null, this);
+            fisica.add.collider(bala, grisverdosoBricks, hitBala, null, this);
+        });
+
+        if (repeticiones > 0) {
+            setTimeout(function () {
+                disparar(fisica, repeticiones - 1);
+            }, 500)
+            // laser = this.sound.add('laser');
+        }
     }
+
 }
-// function render() {
-
-//   game.debug.text("Time until event: " + game.time.events.duration.toFixed(0), 32, 32);
-//   game.debug.text("Next tick: " + game.time.events.next.toFixed(0), 32, 64);
-
-// }
-
-
 
 
 

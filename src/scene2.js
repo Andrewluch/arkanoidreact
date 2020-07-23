@@ -9,8 +9,14 @@ let openingText, gameOverText, playerWonText;
 let playerX = 400;
 let playerY = 600
 let isBalaCreated = false
-var score = 0;
+let maximo;
+var highscoreText = maximo;
+var highscoreTextNumber;
+let score;
+var scoreTextNumber;
+let arrayCapsulas = [];
 var scoreText;
+var livesTextNumber;
 var lives = 3;
 var livesText;
 var height = 640;
@@ -26,6 +32,7 @@ class Scene2 extends Phaser.Scene {
 
     preload() {
         this.load.image('background2', 'assets/images/background2(1).png');
+        this.load.image('creditos', 'assets/images/arkanoid-copyright.png');
         this.load.image('logo', 'assets/images/arkanoid-logo.png');
         this.load.image('bordeIzdo', 'assets/images/borde-izdo.png');
         this.load.image('bordeSup', 'assets/images/borde-sup.png');
@@ -59,9 +66,10 @@ class Scene2 extends Phaser.Scene {
         // this.load.audio('laser', 'assets/audio/laser.mp3');
     };
     create() {
-
-        this.add.image(1000, 50, 'logo');
+        score = parseInt(localStorage.getItem('score'));
+        this.add.image(1000, 120, 'logo');
         this.add.image(400, 320, 'background2');
+        this.add.image(995, 620, 'creditos');
 
 
         //CAPSULA ROJA
@@ -118,15 +126,6 @@ class Scene2 extends Phaser.Scene {
             repeat: -1
         });
 
-
-        // WebFont.load({
-        //     custom: {
-        //         families: ['Game Over'],
-        //         urls: ['assets/fonts/game_over.css'], //I included what this should look like below
-        //     },
-        // });
-
-
         // CREAR LA PALA
         player = this.physics.add.sprite(
             playerX,
@@ -142,13 +141,6 @@ class Scene2 extends Phaser.Scene {
         );
 
 
-        // CREAR LA BALA
-        /*bala = this.physics.add.sprite(
-          432, // x position
-          560, // y position
-          'bala' // clave de imagen para el sprite
-        );*/
-
 
         // AÑADIR EL AUDIO 
         //El primer parámetro es la llamada a la clave que contiene la ruta
@@ -163,15 +155,13 @@ class Scene2 extends Phaser.Scene {
         });
 
 
-        this.physics.world.setBounds(25, 25, 745, 640);
-
         // AÑADIR LADRILLOS VERDES ABAJO
         greenBricks = this.physics.add.group({
             key: 'brick4',
             repeat: 1,
             immovable: true,
             setXY: {
-                x: 400,
+                x: 370,
                 y: 250,
                 stepX: 70
             }
@@ -184,7 +174,7 @@ class Scene2 extends Phaser.Scene {
             repeat: 1,
             immovable: true,
             setXY: {
-                x: 400,
+                x: 370,
                 y: 70,
                 stepX: 70
             }
@@ -194,10 +184,10 @@ class Scene2 extends Phaser.Scene {
         // AÑADIR LADRILLOS VIOLETAS
         violetBricks = this.physics.add.group({
             key: 'brick1',
-            repeat: 8,
+            repeat: 7,
             immovable: true,
             setXY: {
-                x: 125,
+                x: 170,
                 y: 160,
                 stepX: 70
             }
@@ -209,7 +199,7 @@ class Scene2 extends Phaser.Scene {
             repeat: 5,
             immovable: true,
             setXY: {
-                x: 280,
+                x: 240,
                 y: 130,
                 stepX: 70
             }
@@ -221,7 +211,7 @@ class Scene2 extends Phaser.Scene {
             repeat: 5,
             immovable: true,
             setXY: {
-                x: 280,
+                x: 240,
                 y: 190,
                 stepX: 70
             }
@@ -233,7 +223,7 @@ class Scene2 extends Phaser.Scene {
             repeat: 2,
             immovable: true,
             setXY: {
-                x: 365,
+                x: 335,
                 y: 220,
                 stepX: 70
             }
@@ -244,23 +234,12 @@ class Scene2 extends Phaser.Scene {
             repeat: 2,
             immovable: true,
             setXY: {
-                x: 365,
+                x: 335,
                 y: 100,
                 stepX: 70
             }
         });
 
-        //AÑADIR BALAS
-        balas = this.physics.add.group({
-            key: 'bala',
-            repeat: 0,
-            immovable: true,
-            // setXY: {
-            //     playerX,
-            //     playerY,
-            //     stepX: 30
-            // }
-        });
 
 
         // MANEJAR CON EL TECLADO
@@ -287,7 +266,6 @@ class Scene2 extends Phaser.Scene {
 
         // Hacer que el jugador sea inamovible
         player.setImmovable(true);
-        //bala.setImmovable(true);
 
         // Añadir colisión para la jugadora
         this.physics.add.collider(ball, player, hitPlayer, null, this);
@@ -358,8 +336,6 @@ class Scene2 extends Phaser.Scene {
                 fill: '#fff'
             },
 
-            //this.scene.add('scene2'),
-            //this.scene.add('Scene2'),
 
         );
 
@@ -368,24 +344,47 @@ class Scene2 extends Phaser.Scene {
         // Hazlo invisible hasta que la jugadora gane
         playerWonText.setVisible(false);
 
-        // TEXTO SCORE
-        scoreText = this.add.text(923, 193, 'Score: 0', { fontFamily: 'Game Over', fontSize: '100px', fill: 'red' });
-        livesText = this.add.text(923, 293, 'Lives: 3', { fontFamily: 'Game Over', fontSize: '100px', fill: 'red' });
-        scoreText = this.add.text(50, 16, 'Score: 0', { fontSize: '24px', fill: '#fff' });
-        livesText = this.add.text(626, 16, 'Lives: 3', { fontSize: '24px', fill: '#fff' });
+        // TEXTO SCORE 
+        highscoreText = this.add.text(850, 190, 'High Score ', { fontFamily: 'Game Over', fontSize: '100px', fill: '#fff' });
+        highscoreTextNumber = this.add.text(850, 220, '0', { fontFamily: 'Game Over', fontSize: '125px', fill: 'yellow' });
+        scoreText = this.add.text(850, 290, 'Score ', { fontFamily: 'Game Over', fontSize: '100px', fill: '#fff' });
+        scoreTextNumber = this.add.text(850, 320, '0', { fontFamily: 'Game Over', fontSize: '125px', fill: 'yellow' });
+        livesText = this.add.text(850, 390, 'Lives ', { fontFamily: 'Game Over', fontSize: '100px', fill: '#fff' });
+        livesTextNumber = this.add.text(850, 420, '3', { fontFamily: 'Game Over', fontSize: '125px', fill: 'yellow' });
+
 
     };
     update() {
-        console.log('en la escena 2')
+        maximo = localStorage.getItem('highscore')
+        let highscore = localStorage.getItem('highscore')
+        highscoreText.setText('High Score ')
+        highscoreTextNumber.setText(maximo)
+        console.log(maximo);
+        scoreText.setText('Score ')
+        scoreTextNumber.setText(score)
+
+        if (highscore === undefined) {
+            parseInt(localStorage.setItem('highscore', score))
+        }
+        if (score > highscore) {
+            parseInt(localStorage.setItem('highscore', score))
+        }
+
         if (isGameOver(this.physics.world)) {
             gameOverText.setVisible(false);
             //ball.disableBody(true, true);
             soundtrack.stop('');
             lives = lives - 1;
-            livesText.setText('Lives: ' + lives);
+            livesTextNumber.setText(lives);
+            livesText.setText('Lives ' )
             livesText.setFontFamily('Game Over')
+            for (let i = 0; i < arrayCapsulas.length; i++) {
+                arrayCapsulas[i].destroy()
+            }
             ball.setPosition(400, 565);
             player.setPosition(400, 600);
+            ball.body.setVelocityX(ball.body.velocity.x)
+            ball.body.setVelocityX(ball.body.velocity.y)
             if (lives === 0) {
                 gameOverText.setVisible(true);
                 ball.body.setVelocityY(0);
@@ -403,50 +402,41 @@ class Scene2 extends Phaser.Scene {
 
                 {
                     fontFamily: 'Game Over',
-                    fontSize: '5100px',
+                    fontSize: '100px',
                     fill: '#fff'
                 },
 
+                localStorage.setItem('score', score)
             );
 
             playerWonText.setOrigin(0.5);
             playerWonText.setVisible(true);
 
-            // Hazlo invisible hasta que la jugadora gane
-            // playerWonText.setVisible(false);
 
-            // setTimeout(function(){
             this.scene.switch('Scene3');
             this.scene.wake('Scene3');
             this.scene.sleep('Scene2');
 
-            // },200)
+
         } else {
             // Pon esto para que el jugador no se mueva si no se presiona ninguna tecla
             player.body.setVelocityX(0);
-            // bala.body.setVelocityX(0);
-            // bala2.body.setVelocityX(0);
+
 
             /*
              Verifique el cursor y mueva la velocidad en consecuencia. Con Arcade Physics nosotros
              ajustar la velocidad de movimiento en lugar de manipular los valores xy directamente
              */
             if (cursors.left.isDown) {
-                player.body.setVelocityX(-1200);
+                player.body.setVelocityX(-600);
                 playerX = player.body.position.x
                 playerY = player.body.position.y
-                // if(isBalaCreated){
-                //  bala.body.setVelocityX(-1200);
-                // // bala2.body.setVelocityX(-1200);
-                // }
+
             } else if (cursors.right.isDown) {
-                player.body.setVelocityX(1200);
+                player.body.setVelocityX(600);
                 playerX = player.body.position.x
                 playerY = player.body.position.y
-                // if(isBalaCreated){
-                //  bala.body.setVelocityX(1200);
-                // // bala2.body.setVelocityX(1200);
-                // }
+
             }
 
             // El juego solo comienza cuando el usuario presiona la barra espaciadora para soltar la pala
@@ -454,25 +444,10 @@ class Scene2 extends Phaser.Scene {
 
                 // La pelota debe seguir la paleta mientras el usuario selecciona por dónde comenzar
                 ball.setX(player.x);
-                //bala.setX(player.x + 35);
-                //bala2.setX(player.x -40);
-                //bala1.setX(player.x);
 
                 if (cursors.space.isDown) {
                     gameStarted = true;
-                    /*
-                    if(tieneLaCapsulaDeDisparar) {
-                      //creamos un objeto bala.
-                      // le damos posicion X y posicion Y de la pala
-                      // le damos velocityy -200
-                    }
-                    */
-
                     ball.setVelocityY(-300);
-                    //bala.setImmovable(true);
-                    // bala.setVelocityY(-200);
-                    // bala2.setVelocityY(-200);
-
                     openingText.setVisible(false);
                 }
             }
@@ -515,6 +490,11 @@ function isWon() {
 function hitBala(bala, brick) {
     brick.disableBody(true, true);
     bala.disableBody(true, true);
+    score += 10;
+    scoreText.setText('Score ' )
+    scoreTextNumber.setText( score)
+
+
 }
 
 function hitBrick(ball, brick) {
@@ -522,7 +502,7 @@ function hitBrick(ball, brick) {
     let noCoincidir = false;
 
     // CAPSULA ALEATORIA ROJA
-    const capsulaRojaAleatoria = Math.floor(Math.random() * 8);
+    const capsulaRojaAleatoria = Math.floor(Math.random() * 1);
     if (capsulaRojaAleatoria === 0 && noCoincidir === false) {
         let posicionX = brick.body.position.x + 30;
         let posicionY = brick.body.position.y + 10;
@@ -531,15 +511,16 @@ function hitBrick(ball, brick) {
         this.physics.add.collider(this.capsula, player, hitBoom, null, this);
         this.capsula.anims.play('turnCapsuleRoja');
         noCoincidir = true;
+        arrayCapsulas.push(this.capsula)
 
         //COLISION BOMBA CON PALA
         this.physics.add.collider(this.capsula, player, hitBoom, null, this);
-        // this.physics.add.collider(this.boom, player,hitBala, null, this);
 
     }
 
+
     //CAPSULA ALEATORIA NARANJA
-    const capsulaNaranjaAleatoria = Math.floor(Math.random() * 10);
+    const capsulaNaranjaAleatoria = Math.floor(Math.random() * 8);
     if (capsulaNaranjaAleatoria === 0 && noCoincidir === false) {
         let posicionX = brick.body.position.x + (brick.body.width / 3.2) + 10;
         let posicionY = brick.body.position.y + (brick.body.height / 2);
@@ -547,6 +528,7 @@ function hitBrick(ball, brick) {
         this.capsula.setGravityY(100);
         this.capsula.anims.play('turnCapsuleNaranja');
         noCoincidir = true;
+        arrayCapsulas.push(this.capsula)
 
         //COLISION CON PALA
         this.physics.add.collider(this.capsula, player, hitCapsulaNaranja, null, this);
@@ -563,6 +545,7 @@ function hitBrick(ball, brick) {
         this.physics.add.collider(this.capsula, player, hitCorazon, null, this);
         this.capsula.anims.play('turnCapsuleGris');
         noCoincidir = true;
+        arrayCapsulas.push(this.capsula)
 
         //COLISION CORAZON CON PALA
         this.physics.add.collider(this.capsula, player, hitCorazon, null, this);
@@ -578,6 +561,7 @@ function hitBrick(ball, brick) {
         this.capsula.anims.play('turnCapsuleCeleste');
         this.capsula.setGravityY(100);
         noCoincidir = true;
+        arrayCapsulas.push(this.capsula)
 
         //COLISION ESTRELLA CON PALA
         this.physics.add.collider(this.capsula, player, hitStar, null, this);
@@ -593,6 +577,7 @@ function hitBrick(ball, brick) {
         this.capsula.setGravityY(100);
         this.capsula.anims.play('turnCapsuleVerde');
         noCoincidir = true;
+        arrayCapsulas.push(this.capsula)
 
         //COLISION  CON PALA
         this.physics.add.collider(this.capsula, player, hitCapsulaVerde, null, this);
@@ -606,6 +591,7 @@ function hitBrick(ball, brick) {
         this.capsula = this.physics.add.sprite(posicionX, posicionY, 'capsulamorada');
         this.capsula.setGravityY(100);
         this.capsula.anims.play('turnCapsuleMorada');
+        arrayCapsulas.push(this.capsula)
 
         //COLISION  CON PALA
         this.physics.add.collider(this.capsula, player, hitCapsulaMorada, null, this);
@@ -625,6 +611,9 @@ function hitBrick(ball, brick) {
         this.physics.add.collider(ball, yellowBricks, hitBrick, null, this);
         this.physics.add.collider(ball, redBricks, hitBrick, null, this);
         this.physics.add.collider(ball, greenBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, orangeBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, greyBricks, hitBrick, null, this);
+        this.physics.add.collider(ball, pinkBricks, hitBrick, null, this);
         this.physics.add.collider(ball, player, hitPlayer, null, this);
 
         ball.setCollideWorldBounds(true);
@@ -646,24 +635,33 @@ function hitBrick(ball, brick) {
             verde = false;
         }
     }
-
     function hitCapsulaNaranja(capsula, player) {
-        let newXVelocity = Math.abs(ball.body.velocity.x) / 2;
-        let newYVelocity = Math.abs(ball.body.velocity.y) / 2;
+
         capsula.disableBody(true, true);
         player.scaleX = 1;
+        let oldXVelocity = ball.body.velocity.x;
+        let oldYVelocity = ball.body.velocity.y;
+        let newXVelocity = ball.body.velocity.x / 2;
+        let newYVelocity = ball.body.velocity.y / 2;
+        ball.body.setVelocityY(newYVelocity);
+        ball.body.setVelocityX(newXVelocity);
+        setTimeout(() => {
+            // newXVelocity = ball.body.velocity.x ;
+            // newYVelocity = ball.body.velocity.y ;
+            ball.body.setVelocityX(ball.body.velocity.x * 2);
+            ball.body.setVelocityY(ball.body.velocity.y * 2);
 
-        if (verde === false) {
-            ball.body.setVelocityY(-newYVelocity);
-            ball.body.setVelocityX(newXVelocity);
-        }
+        }, 5000)
+
+
+
+
     }
 
     let palaDoble = false;
     function hitCapsulaMorada(capsula, player) {
 
-        // ball.body.setVelocityY(-400);
-        // ball.body.setVelocityX(400);
+
         capsula.disableBody(true, true);
         palaDoble = true;
         player.scaleX = 1.5;
@@ -679,7 +677,9 @@ function hitBrick(ball, brick) {
 
 
     score += 10;
-    scoreText.setText('Score: ' + score);
+    scoreText.setText('Score ' )
+    scoreTextNumber.setText( score)
+
     beep.play();
 
     if (ball.body.velocity.x == 0) {
@@ -690,6 +690,7 @@ function hitBrick(ball, brick) {
             ball.body.setVelocityX(-300);
         }
     }
+
 }
 
 
@@ -702,12 +703,26 @@ function hitBrick(ball, brick) {
   @param ball - the ball sprite
   @param player - the player/paddle sprite
  */
+
+//ESTO ES LO MIO
+// function hitPlayer(ball, player) {
+//     // Aumenta la velocidad de la pelota después de que rebota
+//     ball.setVelocityY(ball.body.velocity.y - 5);
+
+//     let newXVelocity = Math.abs(ball.body.velocity.x) + 5;
+//     // Si la pelota está a la izquierda del jugador, asegúrese de que la velocidad x sea negativa
+//     if (ball.x < player.x) {
+//         ball.setVelocityX(-newXVelocity);
+//     } else {
+//         ball.setVelocityX(newXVelocity);
+//     }
+// }
 function hitPlayer(ball, player) {
-    // Aumenta la velocidad de la pelota después de que rebota
+    // Increase the velocity of the ball after it bounces
     ball.setVelocityY(ball.body.velocity.y - 5);
 
     let newXVelocity = Math.abs(ball.body.velocity.x) + 5;
-    // Si la pelota está a la izquierda del jugador, asegúrese de que la velocidad x sea negativa
+    // If the ball is to the left of the player, ensure the x velocity is negative
     if (ball.x < player.x) {
         ball.setVelocityX(-newXVelocity);
     } else {
@@ -721,9 +736,10 @@ function hitCorazon(capsula, player) {
     capsula.disableBody(true, true);
     lives = lives + 1
 
-    livesText.setText('Lives: ' + lives);
+    livesTextNumber.setText(lives);
+    livesText.setText('Lives ' )
     livesText.setFontFamily('Game Over');
-    // player.width.setScale(2).refreshBody();
+
 }
 
 function hitBoom(capsula, player) {

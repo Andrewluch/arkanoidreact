@@ -502,7 +502,7 @@ function hitBrick(ball, brick) {
     let noCoincidir = false;
 
     // CAPSULA ALEATORIA ROJA
-    const capsulaRojaAleatoria = Math.floor(Math.random() * 1);
+    const capsulaRojaAleatoria = Math.floor(Math.random() * 6);
     if (capsulaRojaAleatoria === 0 && noCoincidir === false) {
         let posicionX = brick.body.position.x + 30;
         let posicionY = brick.body.position.y + 10;
@@ -605,7 +605,11 @@ function hitBrick(ball, brick) {
             565,
             'ball',
         );
-        ball.setVelocityY(-300)
+        ball.setVelocityY(-600);
+        ball.setVelocityX(600);
+        // let v= Math.floor(Math.random() * 30)+20;
+        // ball.setVelocityX(v);
+        // ball.setVelocityY(-300)
         ball.setBounce(1, 1);
         this.physics.add.collider(ball, violetBricks, hitBrick, null, this);
         this.physics.add.collider(ball, yellowBricks, hitBrick, null, this);
@@ -630,8 +634,8 @@ function hitBrick(ball, brick) {
         ball.body.setVelocityY(0);
         ball.body.setVelocityX(0);
         if (cursors.space.isDown) {
-            ball.body.setVelocityY(-400);
-            ball.body.setVelocityX(400);
+            ball.body.setVelocityY(-600);
+            ball.body.setVelocityX(600);
             verde = false;
         }
     }

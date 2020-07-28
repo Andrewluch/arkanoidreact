@@ -8,23 +8,20 @@ let player, ball, greenBricks, violetBricks, yellowBricks, redBricks, balas, cur
 let gameStarted = false;
 
 let openingText, gameOverText, playerWonText;
-
 let playerX = 400;
 let playerY = 600;
 let arrayCapsulas = [];
-
 let isBalaCreated = false
-var score = 0;
-//var highscore=0;
+let score = 0;
 let maximo;
-var highscoreText = maximo;
-var highscoreTextNumber;
-var scoreText;
-var scoreTextNumber;
-var lives = 3;
-var livesText;
-var livesTextNumber;
-var height = 640;
+let highscoreText = maximo;
+let highscoreTextNumber;
+let scoreText;
+let scoreTextNumber;
+let lives = 3;
+let livesText;
+let livesTextNumber;
+let height = 640;
 let config;
 
 
@@ -218,7 +215,7 @@ class Scene1 extends Phaser.Scene {
 
         // MANEJAR CON EL TECLADO
         cursors = this.input.keyboard.createCursorKeys();
-        //this.physics.world.setBounds(25, 25, 745, 640);
+ 
         // PARA QUE LA PELOTA Y EL JUGADOR NO SALGAN DE LA PANTALLA
         player.setCollideWorldBounds(true);
         ball.setCollideWorldBounds(true);
@@ -228,20 +225,15 @@ class Scene1 extends Phaser.Scene {
         this.physics.world.checkCollision.down = false;
 
         // COLISION DE LOS LADRILLOS
-
-        // this.physics.add.collider(ball, grisverdosoBricks, hitBrick, null, this);
         this.physics.add.collider(ball, violetBricks, hitBrick, null, this);
         this.physics.add.collider(ball, yellowBricks, hitBrick, null, this);
         this.physics.add.collider(ball, redBricks, hitBrick, null, this);
         this.physics.add.collider(ball, greenBricks, hitBrick, null, this);
 
 
-
-
         // Hacer que el jugador sea inamovible
         player.setImmovable(true);
-        //bala.setImmovable(true);
-
+   
         // Añadir colisión para la jugadora
         this.physics.add.collider(ball, player, hitPlayer, null, this);
 
@@ -257,14 +249,7 @@ class Scene1 extends Phaser.Scene {
             },
         );
 
-        /*
-        El origen del objeto de texto está en la parte superior izquierda, cambie el origen al centro para que pueda alinearse correctamente
-         */
         openingText.setOrigin(0.5);
-
-
-
-
 
         // TEXTO GAME OVER
         gameOverText = this.add.text(
@@ -288,20 +273,13 @@ class Scene1 extends Phaser.Scene {
         gameOverText.setVisible(false);
 
 
-
-
         // TEXTO SCORE
-
-
         highscoreText = this.add.text(850, 190, 'High Score ', { fontFamily: 'Game Over', fontSize: '100px', fill: '#fff' });
         highscoreTextNumber = this.add.text(850, 220, '0', { fontFamily: 'Game Over', fontSize: '125px', fill: 'yellow' });
         scoreText = this.add.text(850, 290, 'Score ', { fontFamily: 'Game Over', fontSize: '100px', fill: '#fff' });
         scoreTextNumber = this.add.text(850, 320, '0', { fontFamily: 'Game Over', fontSize: '125px', fill: 'yellow' });    
         livesText = this.add.text(850, 390, 'Lives ', { fontFamily: 'Game Over', fontSize: '100px', fill: '#fff' });
         livesTextNumber = this.add.text(850, 420, '3', { fontFamily: 'Game Over', fontSize: '125px', fill: 'yellow' });
-
-
-
 
 
     };
@@ -325,7 +303,6 @@ class Scene1 extends Phaser.Scene {
 
         if (isGameOver(this.physics.world)) {
             gameOverText.setVisible(false);
-            //ball.disableBody(true, true);
             soundtrack.stop('');
             lives = lives - 1;
 
@@ -337,7 +314,7 @@ class Scene1 extends Phaser.Scene {
             for (let i = 0; i < arrayCapsulas.length; i++) {
                 arrayCapsulas[i].destroy()
             }
-            //
+            
 
 
             ball.setPosition(400, 565);
@@ -382,11 +359,6 @@ class Scene1 extends Phaser.Scene {
             // Pon esto para que el jugador no se mueva si no se presiona ninguna tecla
             player.body.setVelocityX(0);
 
-
-            /*
-             Verifique el cursor y mueva la velocidad en consecuencia. Con Arcade Physics nosotros
-             ajustar la velocidad de movimiento en lugar de manipular los valores xy directamente
-             */
             if (cursors.left.isDown) {
                 player.body.setVelocityX(-600);
                 playerX = player.body.position.x
@@ -419,14 +391,6 @@ class Scene1 extends Phaser.Scene {
 
 }
 
-
-
-
-/*
- Checks if the user lost the game
-  @param world - the physics world
-  @return {boolean}
- */
 function isGameOver(world) {
 
     return ball.body.y > world.bounds.height;
@@ -459,14 +423,12 @@ function hitBala(bala, brick) {
 
 }
 
-
-
 function hitBrick(ball, brick) {
     brick.disableBody(true, true);
     let noCoincidir = false;
 
     // CAPSULA ALEATORIA ROJA
-    const capsulaRojaAleatoria = Math.floor(Math.random() * 1);
+    const capsulaRojaAleatoria = Math.floor(Math.random() * 6);
     if (capsulaRojaAleatoria === 0 && noCoincidir === false) {
         let posicionX = brick.body.position.x + 30;
         let posicionY = brick.body.position.y + 10;
@@ -548,7 +510,7 @@ function hitBrick(ball, brick) {
     }
 
     //CAPSULA ALEATORIA MORADA
-    const capsulaMoradaAleatoria = Math.floor(Math.random() * 5);
+    const capsulaMoradaAleatoria = Math.floor(Math.random() * 6);
     if (capsulaMoradaAleatoria === 0 && noCoincidir === false) {
         let posicionX = brick.body.position.x + (brick.body.width / 3.2) + 10;
         let posicionY = brick.body.position.y + (brick.body.height / 2);
@@ -570,11 +532,8 @@ function hitBrick(ball, brick) {
             565,
             'ball',
         );
-        ball.setVelocityY(-400);
-        ball.setVelocityX(400);
-        // let v= Math.floor(Math.random() * 30)+20;
-        // ball.setVelocityX(v);
-        // ball.setVelocityY(-300)
+        ball.setVelocityY(-600);
+        ball.setVelocityX(600);
         ball.setBounce(1, 1);
         this.physics.add.collider(ball, violetBricks, hitBrick, null, this);
         this.physics.add.collider(ball, yellowBricks, hitBrick, null, this);
@@ -596,8 +555,8 @@ function hitBrick(ball, brick) {
         ball.body.setVelocityY(0);
         ball.body.setVelocityX(0);
         if (cursors.space.isDown) {
-            ball.body.setVelocityY(-400);
-            ball.body.setVelocityX(400);
+            ball.body.setVelocityY(-600);
+            ball.body.setVelocityX(600);
             verde = false;
         }
     }
@@ -619,9 +578,6 @@ function hitBrick(ball, brick) {
             ball.body.setVelocityY(ball.body.velocity.y * 2);
 
         }, 5000)
-
-
-
 
     }
 
